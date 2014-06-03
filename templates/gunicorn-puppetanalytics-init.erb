@@ -1,0 +1,89 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:        gunicorn-puppetanalytics
+# Required-Start:  $network $remote_fs $syslog
+# Required-Stop:   $network $remote_fs $syslog
+# Default-Start:   2 3 4 5
+# Default-Stop:    1
+# Short-Description: Start puppetanalytics run via gunicorn
+### END INIT INFO
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+. /lib/lsb/init-functions
+
+APPDIR=/opt/puppet-analytics/puppetanalytics
+VIRTUALENV=/opt/python/flaskenv
+PORT=<%= @port %>
+LOGDIR=/var/log/gunicorn
+USER=www-data
+GROUP=www-data
+IP=0.0.0.0
+WORKERS=4
+DESC="Gunicorn-Puppetanalytics"
+NAME="gunicorn-puppetanalytics"
+LOGFILE=${LOGDIR}/puppetanalytics.log
+PIDFILE=/tmp/puppetanalytics.pid
+GUNICORN_OPTS="-D -b ${IP}:${PORT} -w $WORKERS -p $PIDFILE --log-file=$LOGFILE --log-level=info --name=$NAME app:app"
+COMMAND=gunicorn
+
+do_start() {
+  log_daemon_msg "Starting $DESC" "$NAME"
+  if [ -e $PIDFILE ]; then
+    return 1
+  fi
+  cd $APPDIR
+  . $VIRTUALENV/bin/activate
+  $COMMAND $GUNICORN_OPTS
+  if [ $? = 0 ]; then
+    return 0
+  else
+    return 2
+  fi
+}
+
+do_stop() {
+  log_daemon_msg "Stopping $DESC" "$NAME"
+  if [ -f $PIDFILE ]; then
+    PID=`cat $PIDFILE`
+    rm $PIDFILE
+    kill -15 $PID
+    if [ $? = 0 ]; then
+      return 0
+    else
+      return 2
+    fi
+  else
+    return 1
+  fi
+}
+
+do_reload() {
+  log_daemon_msg "Reloading $DESC" "$NAME"
+  if [ -f $PIDFILE ]; then
+    PID=`cat $PIDFILE`
+    kill -HUP $PID
+    return $?
+  fi
+  return 2
+}
+
+case "$1" in
+  start)
+    do_start
+    ;;
+  stop)
+    do_stop
+    ;;
+  reload)
+    do_reload
+    ;;
+  restart)
+    do_stop
+    do_start
+    ;;
+  status)
+    status_of_proc gunicorn $DESC
+    ;;
+esac
