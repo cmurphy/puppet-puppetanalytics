@@ -13,6 +13,7 @@ class puppetanalytics {
     provider => 'git',
     source   => 'https://github.com/nibalizer/puppet-analytics.git',
     revision => '643f4fe4fd23aea33e8a0563607bed425be0f736',
+    notify   => Service['gunicorn-puppetanalytics'],
   }
 
 }
