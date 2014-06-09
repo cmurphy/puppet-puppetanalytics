@@ -12,7 +12,7 @@ class puppetanalytics {
     ensure   => present,
     provider => 'git',
     source   => 'https://github.com/nibalizer/puppet-analytics.git',
-    revision => '35975ec8ae414db575003f99a2609002b31549cc',
+    revision => '643f4fe4fd23aea33e8a0563607bed425be0f736',
   }
 
 }
