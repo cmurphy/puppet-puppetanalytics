@@ -8,11 +8,15 @@ class puppetanalytics {
     port => 8000,
   }
 
+  package { 'sqlite3':
+    ensure => installed,
+  }
+
   vcsrepo { '/opt/puppet-analytics':
     ensure   => present,
     provider => 'git',
     source   => 'https://github.com/nibalizer/puppet-analytics.git',
-    revision => '643f4fe4fd23aea33e8a0563607bed425be0f736',
+    revision => 'master',
     notify   => Service['gunicorn-puppetanalytics'],
   }
 
